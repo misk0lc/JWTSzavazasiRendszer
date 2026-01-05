@@ -65,8 +65,21 @@ class AuthApiController extends Controller
         }
 
         try {
-            // Invalidate token
-            JWTAuth::parseToken()->invalidate();
+            // Try to revoke/invalidate the token provided in the Authorization header.
+            $header = $request->header('Authorization', '') ?: $request->bearerToken();
+            $token = null;
+            if ($header && str_starts_with($header, 'Bearer ')) {
+                $token = substr($header, 7);
+            } elseif ($header) {
+                $token = $header;
+            }
+
+            // Fallbacks for servers that don't forward Authorization header
+            if (!$token) {
+                $token = $request->header('X-Api-Token') ?: $request->query('token') ?: $request->input('token');
+            }
+
+            JWTAuth::revokeToken($token);
         } catch (\Exception $e) {
             // Token missing or already invalid
         }

@@ -43,7 +43,25 @@ class JWTAuth
         if (!$token) {
             return null;
         }
-        return self::$tokens[$token]['user_id'] ?? null;
+
+        // First check in-memory token map (allows revocation for tokens created
+        // during the current process / tests).
+        if (isset(self::$tokens[$token]['user_id'])) {
+            return self::$tokens[$token]['user_id'];
+        }
+
+        // Fallback: try to decode a stateless token format produced by `fromUser`.
+        // `fromUser` encodes a string containing "uniqid|<user_id>" using base64.
+        $decoded = base64_decode($token, true);
+        if ($decoded !== false) {
+            $parts = explode('|', $decoded);
+            $maybeId = end($parts);
+            if (is_numeric($maybeId)) {
+                return (int) $maybeId;
+            }
+        }
+
+        return null;
     }
 
     public static function revokeToken(?string $token): void

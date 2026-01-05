@@ -24,12 +24,21 @@ class JwtGuard implements Guard
         // Always resolve user from current request/guards (don't cache across requests)
 
         $req = request();
+        // Try common places for bearer token. Some servers (Apache/mod_php)
+        // do not forward the `Authorization` header to PHP by default, so
+        // accept alternative locations: `X-Api-Token` header or `token`
+        // query/body parameter.
         $header = $req->header('Authorization', '') ?: $req->bearerToken();
         $token = null;
-        if (str_starts_with($header, 'Bearer ')) {
+        if ($header && str_starts_with($header, 'Bearer ')) {
             $token = substr($header, 7);
         } elseif ($header) {
             $token = $header;
+        }
+
+        // Fallbacks if Authorization header wasn't forwarded
+        if (!$token) {
+            $token = $req->header('X-Api-Token') ?: $req->query('token') ?: $req->input('token');
         }
 
         $userId = JWTAuth::getUserIdFromToken($token);
