@@ -28,7 +28,12 @@ class VoteApiController extends Controller
 
         $options = $poll->options ?? [];
         if (!in_array($data['selected_option'], $options, true)) {
-            return response()->json(['message' => 'Invalid option'], 422);
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => [
+                    'selected_option' => ['Invalid option'],
+                ],
+            ], 422);
         }
 
         $already = $poll->votes()->where('user_id', $user->id)->exists();
@@ -43,6 +48,9 @@ class VoteApiController extends Controller
             'voted_at' => now(),
         ]);
 
-        return response()->json($vote, 201);
+        return response()->json([
+            'message' => 'Vote recorded successfully',
+            'vote' => $vote,
+        ], 201);
     }
 }

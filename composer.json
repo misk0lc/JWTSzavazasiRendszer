@@ -9,7 +9,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
-        "php-open-source-saver/jwt-auth": "^1.4"
+        "php-open-source-saver/jwt-auth": "^1.4",
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
@@ -25,7 +25,8 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "PHPOpenSourceSaver\\JWTAuth\\": "app/Services/JWTAuth/"
         }
     },
     "autoload-dev": {
